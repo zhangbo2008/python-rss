@@ -166,7 +166,17 @@ def ctx(category='', keywords=''):
 
 
 
-
+然后ctx里面fetch函数本质也就是requests.get
+def fetch(url: str, headers: dict=DEFAULT_HEADERS, proxies: dict=None):
+    try:
+        res = requests.get(url, headers=headers, proxies=proxies)
+        res.raise_for_status() # 如果请求非200就报错
+    except Exception as e:
+        print(f'[Err] {e}')
+    else:  # 如果正常, 那么就配置html即可.
+        html = res.text
+        tree = Selector(text=html)
+        return tree
 
 
 
