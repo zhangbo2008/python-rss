@@ -115,3 +115,60 @@ follow-rss:
   付费的订阅50个.
 
 # python-rss
+
+
+# 2024-12-12,20点35 理解代码 蓝图:
+@bp.route('/aisixiang/search/<string:category>/<string:keywords>')
+def aisixiang_search(category='', keywords=''):
+    from rsshub.spiders.aisixiang.search import ctx
+    return render_template('main/atom.xml', **filter_content(ctx(category, keywords)))
+
+
+
+核心是ctx函数:
+
+from urllib.parse import quote, unquote
+from rsshub.utils import fetch, DEFAULT_HEADERS
+
+
+domain = 'https://www.aisixiang.com'
+
+
+def parse(post):
+    item = {}
+    item['description'] = item['title'] = post.css('a::text').getall()[-1]
+    item['link'] = f"{domain}{post.css('a::attr(href)').getall()[-1]}"
+    item['pubDate'] = post.css('span::text').extract_first()
+    return item
+
+
+def ctx(category='', keywords=''):
+    keywords = unquote(keywords,encoding='utf-8')   # 加减引号
+    keywords_gbk = quote(keywords, encoding='gbk')
+    url = f"{domain}/data/search.php?keyWords={keywords_gbk}&searchfield={category}"   # 拼成url
+    tree = fetch(url, headers=DEFAULT_HEADERS) # fetch来请求网页
+    posts = tree.css('.search_list').css('li')
+    return {
+        'title': f'{keywords} - {category}搜索 - 爱思想',
+        'link': url,
+        'description': f'{keywords} - {category}搜索 - 爱思想',
+        'author': 'hillerliao',
+        'items': list(map(parse, posts))
+    }
+
+
+
+# 上述代码的debug流程:
+
+首先浏览器get 这个地址/aisixiang/search/<string:category>/<string:keywords>
+通过地址传入两个参数category和keywords
+然后走ctx(category, keywords) 函数.
+
+
+
+
+
+
+
+
+

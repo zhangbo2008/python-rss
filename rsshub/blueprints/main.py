@@ -7,6 +7,10 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 @cache.cached(timeout=3600)
 def word(category=''):
+    print(1111111)
+    print(1111111)
+    print(1111111)
+    print(1111111)
     from rsshub.spiders.word.word import ctx
     return render_template('main/word.html', **ctx(category))
 
